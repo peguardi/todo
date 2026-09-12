@@ -1,0 +1,56 @@
+name: Generar APK de Flet
+
+# El proceso se activará manualmente o cada vez que subas cambios a la rama "main"
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Permite ejecutar el botón "Run workflow" manualmente desde GitHub
+
+jobs:
+  build-apk:
+    name: Compilar APK Android
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargar el código del repositorio
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      # 2. Configurar la versión correcta de Java necesaria para Android
+      - name: Configurar Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 3. Configurar Python en el entorno de GitHub
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip' # Acelera futuras compilaciones guardando dependencias
+
+      # 4. Instalar Flet y las dependencias del proyecto
+      - name: Instalar dependencias de Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 5. Configurar Flutter (Framework subyacente que usa Flet)
+      - name: Configurar Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      # 6. Ejecutar el comando de compilación para Android
+      - name: Compilar Flet APK
+        run: |
+          flet build apk --verbose
+
+      # 7. Subir el APK final generado como un artefacto descargable
+      - name: Guardar APK como Artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: MiAppFlet-Android-APK
+          path: build/apk/
+          if-no-files-found: error
