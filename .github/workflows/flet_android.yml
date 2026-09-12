@@ -36,11 +36,12 @@ jobs:
       - name: Configurar Flutter SDK
         uses: subosito/flutter-action@v2.18.0
         with:
+          flutter-version: '3.44.8'
           channel: 'stable'
 
       - name: Compilar Flet APK
         run: |
-          flet build apk --verbose
+          flet build apk --yes --verbose
 
       - name: Guardar APK como Artefacto
         uses: actions/upload-artifact@v4.6.1
